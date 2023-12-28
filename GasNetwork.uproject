@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{293C6C6C-4649-CCF8-47CC-ACA094A02623}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "GasNetwork",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
