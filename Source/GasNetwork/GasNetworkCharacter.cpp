@@ -8,6 +8,11 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GAS/Components/GASComponentBase.h"
+#include "GAS/AttributeSets/GASAttributeSetBase.h"
+
 //////////////////////////////////////////////////////////////////////////
 // AGasNetworkCharacter
 
@@ -49,6 +54,40 @@ AGasNetworkCharacter::AGasNetworkCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	AbilitySystemComponent = CreateDefaultSubobject<UGASComponentBase>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+
+	AttributeSet = CreateDefaultSubobject<UGASAttributeSetBase>(TEXT("AttributeSet"));
+}
+
+bool AGasNetworkCharacter::ApplyDamageToSelf(TSubclassOf<UGameplayEffect> Effect,
+	FGameplayEffectContextHandle InEffectContext)
+{
+	return false;
+}
+
+void AGasNetworkCharacter::InitAttributes()
+{
+}
+
+void AGasNetworkCharacter::GiveAbilities()
+{
+}
+
+void AGasNetworkCharacter::ApplyStartEffects()
+{
+}
+
+void AGasNetworkCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+}
+
+void AGasNetworkCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
 }
 
 //////////////////////////////////////////////////////////////////////////

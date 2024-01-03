@@ -4,7 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Abilities/GameplayAbility.h"
 #include "GasNetworkCharacter.generated.h"
+
+class UGASComponentBase;
+class UGASAttributeSetBase;
+
+class UGameplayEffect;
+class UGameplayAbility;
 
 UCLASS(config=Game)
 class AGasNetworkCharacter : public ACharacter
@@ -25,8 +32,31 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+	bool ApplyDamageToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
 protected:
 
+	void InitAttributes();
+	void GiveAbilities();
+	void ApplyStartEffects();
+
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="GAS")
+	TSubclassOf<UGameplayEffect> DefaultAttributeSet;
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="GAS")
+	TArray<TSubclassOf<UGameplayEffect>> DefaultAbilities;
+	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="GAS")
+	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
+
+	UPROPERTY(EditDefaultsOnly)
+	UGASComponentBase* AbilitySystemComponent;
+
+	UPROPERTY(Transient)
+	UGASAttributeSetBase* AttributeSet;
+	
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
 
