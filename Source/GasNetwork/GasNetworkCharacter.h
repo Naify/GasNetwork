@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 #include "Abilities/GameplayAbility.h"
 #include "GasNetworkCharacter.generated.h"
@@ -14,7 +15,7 @@ class UGameplayEffect;
 class UGameplayAbility;
 
 UCLASS(config=Game)
-class AGasNetworkCharacter : public ACharacter
+class AGasNetworkCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -32,7 +33,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
-	bool ApplyDamageToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	bool ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
 protected:
 
 	void InitAttributes();
@@ -46,7 +49,7 @@ protected:
 	TSubclassOf<UGameplayEffect> DefaultAttributeSet;
 	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="GAS")
-	TArray<TSubclassOf<UGameplayEffect>> DefaultAbilities;
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 	
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="GAS")
 	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;

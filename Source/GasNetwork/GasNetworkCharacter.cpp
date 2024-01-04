@@ -62,32 +62,84 @@ AGasNetworkCharacter::AGasNetworkCharacter()
 	AttributeSet = CreateDefaultSubobject<UGASAttributeSetBase>(TEXT("AttributeSet"));
 }
 
-bool AGasNetworkCharacter::ApplyDamageToSelf(TSubclassOf<UGameplayEffect> Effect,
-	FGameplayEffectContextHandle InEffectContext)
+UAbilitySystemComponent* AGasNetworkCharacter::GetAbilitySystemComponent() const
 {
+	return AbilitySystemComponent;
+}
+
+bool AGasNetworkCharacter::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect,
+                                             FGameplayEffectContextHandle InEffectContext)
+{
+	if (!Effect.Get()) return false;
+
+	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1, InEffectContext);
+	if (SpecHandle.IsValid())
+	{		
+		FActiveGameplayEffectHandle ActiveEffect = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+
+		return ActiveEffect.WasSuccessfullyApplied();
+	}
+	
 	return false;
 }
 
 void AGasNetworkCharacter::InitAttributes()
 {
+	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSet)
+	{
+		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
+		EffectContextHandle.AddSourceObject(this);
+
+		ApplyEffectToSelf(DefaultAttributeSet, EffectContextHandle);
+	}
 }
 
 void AGasNetworkCharacter::GiveAbilities()
 {
+	if (HasAuthority() && AbilitySystemComponent)
+	{
+		for (auto DefaultAbility : DefaultAbilities)
+		{
+			FGameplayAbilitySpec();
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(DefaultAbility));
+		}
+	}
 }
 
 void AGasNetworkCharacter::ApplyStartEffects()
 {
+	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSet)
+	{
+		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
+		EffectContextHandle.AddSourceObject(this);
+
+		for (auto CharacterEffect : DefaultEffects)
+		{
+			ApplyEffectToSelf(CharacterEffect, EffectContextHandle);
+		}		
+	}
 }
 
+//server init
 void AGasNetworkCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitAttributes();
+	GiveAbilities();
+	ApplyStartEffects();
 }
 
+//client init
 void AGasNetworkCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitAttributes();
 }
 
 //////////////////////////////////////////////////////////////////////////
