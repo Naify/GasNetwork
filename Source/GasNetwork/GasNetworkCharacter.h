@@ -54,7 +54,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="GAS")
 	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	UGASComponentBase* AbilitySystemComponent;
 
 	UPROPERTY(Transient)

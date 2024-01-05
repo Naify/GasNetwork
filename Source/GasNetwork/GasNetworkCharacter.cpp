@@ -108,7 +108,7 @@ void AGasNetworkCharacter::GiveAbilities()
 
 void AGasNetworkCharacter::ApplyStartEffects()
 {
-	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSet)
+	if (GetLocalRole() == ROLE_Authority)
 	{
 		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
 		EffectContextHandle.AddSourceObject(this);
