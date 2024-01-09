@@ -10,6 +10,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "ActorComponents/GasCharacterMovementComponent.h"
 #include "DataAssets/CharacterDataAsset.h"
 #include "GAS/Components/GASComponentBase.h"
 #include "GAS/AttributeSets/GASAttributeSetBase.h"
@@ -19,7 +20,8 @@
 //////////////////////////////////////////////////////////////////////////
 // AGasNetworkCharacter
 
-AGasNetworkCharacter::AGasNetworkCharacter()
+AGasNetworkCharacter::AGasNetworkCharacter(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UGasCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);

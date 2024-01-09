@@ -28,8 +28,8 @@ class AGasNetworkCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 public:
-	AGasNetworkCharacter();
-
+	AGasNetworkCharacter(const FObjectInitializer& ObjectInitializer);
+	
 	virtual void PostInitializeComponents() override;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
