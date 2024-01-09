@@ -10,8 +10,11 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "DataAssets/CharacterDataAsset.h"
 #include "GAS/Components/GASComponentBase.h"
 #include "GAS/AttributeSets/GASAttributeSetBase.h"
+
+#include "Net/UnrealNetwork.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGasNetworkCharacter
@@ -62,6 +65,16 @@ AGasNetworkCharacter::AGasNetworkCharacter()
 	AttributeSet = CreateDefaultSubobject<UGASAttributeSetBase>(TEXT("AttributeSet"));
 }
 
+void AGasNetworkCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if(IsValid(CharacterDataAsset))
+	{
+		SetCharacterData(CharacterDataAsset->CharacterData);
+	}
+}
+
 UAbilitySystemComponent* AGasNetworkCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
@@ -83,22 +96,11 @@ bool AGasNetworkCharacter::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect
 	return false;
 }
 
-void AGasNetworkCharacter::InitAttributes()
-{
-	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSet)
-	{
-		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
-		EffectContextHandle.AddSourceObject(this);
-
-		ApplyEffectToSelf(DefaultAttributeSet, EffectContextHandle);
-	}
-}
-
 void AGasNetworkCharacter::GiveAbilities()
 {
 	if (HasAuthority() && AbilitySystemComponent)
 	{
-		for (auto DefaultAbility : DefaultAbilities)
+		for (auto DefaultAbility : CharacterData.Abilities)
 		{
 			FGameplayAbilitySpec();
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(DefaultAbility));
@@ -113,7 +115,7 @@ void AGasNetworkCharacter::ApplyStartEffects()
 		FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
 		EffectContextHandle.AddSourceObject(this);
 
-		for (auto CharacterEffect : DefaultEffects)
+		for (auto CharacterEffect : CharacterData.Effects)
 		{
 			ApplyEffectToSelf(CharacterEffect, EffectContextHandle);
 		}		
@@ -127,7 +129,6 @@ void AGasNetworkCharacter::PossessedBy(AController* NewController)
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
-	InitAttributes();
 	GiveAbilities();
 	ApplyStartEffects();
 }
@@ -138,8 +139,6 @@ void AGasNetworkCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-
-	InitAttributes();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -166,6 +165,27 @@ void AGasNetworkCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AGasNetworkCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AGasNetworkCharacter::TouchStopped);
+}
+
+FCharacterData AGasNetworkCharacter::GetCharacterData() const
+{
+	return CharacterData;
+}
+
+void AGasNetworkCharacter::SetCharacterData(const FCharacterData InCharacterData)
+{
+	CharacterData = InCharacterData;
+
+	InitFromCharacterData(CharacterData);
+}
+
+void AGasNetworkCharacter::InitFromCharacterData(const FCharacterData& InCharacterData, bool bFromReplication)
+{
+}
+
+void AGasNetworkCharacter::OnRep_CharacterData()
+{
+	InitFromCharacterData(CharacterData, true);
 }
 
 void AGasNetworkCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
@@ -217,4 +237,11 @@ void AGasNetworkCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void AGasNetworkCharacter::GetLifetimeReplicatedProps( TArray< FLifetimeProperty > & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGasNetworkCharacter, CharacterData);
 }
