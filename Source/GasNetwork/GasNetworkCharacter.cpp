@@ -65,6 +65,8 @@ AGasNetworkCharacter::AGasNetworkCharacter(const FObjectInitializer& ObjectIniti
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 
 	AttributeSet = CreateDefaultSubobject<UGASAttributeSetBase>(TEXT("AttributeSet"));
+
+	FootstepComponent = CreateDefaultSubobject<UFootstepComponent>(TEXT("FootstepComponent"));
 }
 
 void AGasNetworkCharacter::PostInitializeComponents()
@@ -179,6 +181,11 @@ void AGasNetworkCharacter::SetCharacterData(const FCharacterData InCharacterData
 	CharacterData = InCharacterData;
 
 	InitFromCharacterData(CharacterData);
+}
+
+UFootstepComponent* AGasNetworkCharacter::GetFootstepComponent() const
+{
+	return FootstepComponent;
 }
 
 void AGasNetworkCharacter::InitFromCharacterData(const FCharacterData& InCharacterData, bool bFromReplication)

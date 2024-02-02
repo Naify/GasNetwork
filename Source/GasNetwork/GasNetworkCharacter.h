@@ -7,6 +7,7 @@
 #include "GameDataTypes.h"
 #include "GameFramework/Character.h"
 #include "Abilities/GameplayAbility.h"
+#include "ActorComponents/FootstepComponent.h"
 #include "GasNetworkCharacter.generated.h"
 
 class UGASComponentBase;
@@ -104,6 +105,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	class UCharacterDataAsset* CharacterDataAsset;	
 
+	UPROPERTY(BlueprintReadOnly)
+	class UFootstepComponent* FootstepComponent;
+	
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -115,5 +119,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCharacterData(const FCharacterData InCharacterData);
+		
+	class UFootstepComponent* GetFootstepComponent() const;
 };
 
