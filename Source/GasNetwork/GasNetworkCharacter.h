@@ -107,6 +107,23 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	class UFootstepComponent* FootstepComponent;
+
+	//Input
+
+	/*UPROPERTY(EditAnywhere)
+	class UInputMappingContext* DefaultMappingContext;
+	
+	UPROPERTY(EditAnywhere)
+	class UInputAction* MoveForwardInputAction;
+	
+	UPROPERTY(EditAnywhere)
+	class UInputAction* MoveSideInputAction;
+	
+	UPROPERTY(EditAnywhere)
+	class UInputAction* TurnInputAction;
+	
+	UPROPERTY(EditAnywhere)
+	class UInputAction* LookUpInputAction;*/
 	
 public:
 	/** Returns CameraBoom subobject **/
