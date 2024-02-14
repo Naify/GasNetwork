@@ -15,6 +15,11 @@
 #include "GAS/Components/GASComponentBase.h"
 #include "GAS/AttributeSets/GASAttributeSetBase.h"
 
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputTriggers.h"
+#include "InputActionValue.h"
+
 #include "Net/UnrealNetwork.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -100,6 +105,21 @@ bool AGasNetworkCharacter::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect
 	return false;
 }
 
+void AGasNetworkCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+
+	if (APlayerController* PLayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PLayerController->GetLocalPlayer()))
+		{
+			Subsystem->ClearAllMappings();
+
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+}
+
 void AGasNetworkCharacter::GiveAbilities()
 {
 	if (HasAuthority() && AbilitySystemComponent)
@@ -151,7 +171,7 @@ void AGasNetworkCharacter::OnRep_PlayerState()
 void AGasNetworkCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
-	check(PlayerInputComponent);
+	/*check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
@@ -168,7 +188,77 @@ void AGasNetworkCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AGasNetworkCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AGasNetworkCharacter::TouchStopped);
+	PlayerInputComponent->BindTouch(IE_Released, this, &AGasNetworkCharacter::TouchStopped);*/
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		if (MoveForwardInputAction)
+		{
+			EnhancedInputComponent->BindAction(MoveForwardInputAction, ETriggerEvent::Triggered, this, &AGasNetworkCharacter::OnMoveForwardAction);
+		}
+		if (MoveSideInputAction)
+		{
+			EnhancedInputComponent->BindAction(MoveSideInputAction, ETriggerEvent::Triggered, this, &AGasNetworkCharacter::OnMoveSideAction);
+		}
+		if (TurnInputAction)
+		{
+			EnhancedInputComponent->BindAction(TurnInputAction, ETriggerEvent::Triggered, this, &AGasNetworkCharacter::OnTurnAction);
+		}
+		if (LookUpInputAction)
+		{
+			EnhancedInputComponent->BindAction(LookUpInputAction, ETriggerEvent::Triggered, this, &AGasNetworkCharacter::OnLookUpAction);
+		}
+		if (JumpInputAction)
+		{
+			EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &AGasNetworkCharacter::OnJumpAction);
+		}
+	}
+}
+
+void AGasNetworkCharacter::OnMoveForwardAction(const FInputActionValue& Value)
+{
+	const float Magnitude = Value.GetMagnitude();
+	if ((Controller != nullptr) && (Magnitude != 0.0f))
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Magnitude);
+	}
+}
+
+void AGasNetworkCharacter::OnMoveSideAction(const FInputActionValue& Value)
+{
+	const float Magnitude = Value.GetMagnitude();
+	if ( (Controller != nullptr) && (Magnitude != 0.0f) )
+	{
+		// find out which way is right
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	
+		// get right vector 
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		// add movement in that direction
+		AddMovementInput(Direction, Magnitude);
+	}
+}
+
+void AGasNetworkCharacter::OnTurnAction(const FInputActionValue& Value)
+{
+	AddControllerYawInput(Value.GetMagnitude() * 0.5 * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void AGasNetworkCharacter::OnLookUpAction(const FInputActionValue& Value)
+{
+	AddControllerPitchInput(Value.GetMagnitude() * 0.5 * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
+}
+
+void AGasNetworkCharacter::OnJumpAction(const FInputActionValue& Value)
+{
+	Jump();
 }
 
 FCharacterData AGasNetworkCharacter::GetCharacterData() const

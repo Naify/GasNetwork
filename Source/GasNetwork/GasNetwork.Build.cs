@@ -13,6 +13,6 @@ public class GasNetwork : ModuleRules
 		
 		PublicIncludePaths.Add("GasNetwork/");
 		
-		PrivateDependencyModuleNames.AddRange(new string[] { "GameplayAbilities", "GameplayTags", "GameplayTasks" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "GameplayAbilities", "GameplayTags", "GameplayTasks", "EnhancedInput" });
 	}
 }

@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Abilities/GameplayAbility.h"
 #include "ActorComponents/FootstepComponent.h"
+#include "InputActionValue.h"
 #include "GasNetworkCharacter.generated.h"
 
 class UGASComponentBase;
@@ -41,6 +42,8 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	bool ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
+
+	virtual void PawnClientRestart() override;
 	
 protected:
 
@@ -110,7 +113,7 @@ protected:
 
 	//Input
 
-	/*UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	class UInputMappingContext* DefaultMappingContext;
 	
 	UPROPERTY(EditAnywhere)
@@ -123,8 +126,16 @@ protected:
 	class UInputAction* TurnInputAction;
 	
 	UPROPERTY(EditAnywhere)
-	class UInputAction* LookUpInputAction;*/
+	class UInputAction* LookUpInputAction;
 	
+	UPROPERTY(EditAnywhere)
+	class UInputAction* JumpInputAction;
+
+	void OnMoveForwardAction(const FInputActionValue& Value);
+	void OnMoveSideAction(const FInputActionValue& Value);
+	void OnTurnAction(const FInputActionValue& Value);
+	void OnLookUpAction(const FInputActionValue& Value);
+	void OnJumpAction(const FInputActionValue& Value);
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
