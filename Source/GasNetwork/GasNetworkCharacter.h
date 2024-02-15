@@ -39,6 +39,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
+	float MouseSensitivity = 0.4f;
+
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	bool ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
@@ -86,12 +89,6 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	/** Handler for when a touch input begins. */
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-
-	/** Handler for when a touch input stops. */
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -135,7 +132,8 @@ protected:
 	void OnMoveSideAction(const FInputActionValue& Value);
 	void OnTurnAction(const FInputActionValue& Value);
 	void OnLookUpAction(const FInputActionValue& Value);
-	void OnJumpAction(const FInputActionValue& Value);
+	void OnJumpActionStarted(const FInputActionValue& Value);
+	void OnJumpActionFinished(const FInputActionValue& Value);
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
