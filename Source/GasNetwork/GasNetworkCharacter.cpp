@@ -241,11 +241,17 @@ void AGasNetworkCharacter::OnLookUpAction(const FInputActionValue& Value)
 void AGasNetworkCharacter::OnJumpActionStarted(const FInputActionValue& Value)
 {
 	Jump();
+	FGameplayEventData Payload;
+
+	Payload.Instigator = this;
+	Payload.EventTag = JumpEventTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
 }
 
 void AGasNetworkCharacter::OnJumpActionFinished(const FInputActionValue& Value)
 {
-	StopJumping();
+	//StopJumping();
 }
 
 FCharacterData AGasNetworkCharacter::GetCharacterData() const
@@ -263,6 +269,16 @@ void AGasNetworkCharacter::SetCharacterData(const FCharacterData InCharacterData
 UFootstepComponent* AGasNetworkCharacter::GetFootstepComponent() const
 {
 	return FootstepComponent;
+}
+
+void AGasNetworkCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->RemoveActiveEffectsWithTags(InAirTags);
+	}
 }
 
 void AGasNetworkCharacter::InitFromCharacterData(const FCharacterData& InCharacterData, bool bFromReplication)

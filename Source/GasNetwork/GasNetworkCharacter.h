@@ -147,5 +147,15 @@ public:
 	void SetCharacterData(const FCharacterData InCharacterData);
 		
 	class UFootstepComponent* GetFootstepComponent() const;
+
+	virtual void Landed(const FHitResult& Hit) override;
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag JumpEventTag;
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTagContainer InAirTags;
 };
 
